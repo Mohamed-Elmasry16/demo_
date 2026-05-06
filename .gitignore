@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Model cache (كبير جداً للـ git)
+/model-cache/
+.cache/
+
+# ملفات البيانات الحساسة (uncommit لو عايز تشيلها من الـ repo)
+# churn_model.pkl
+# cleaned_data.csv
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# n8n local data
+n8n_data/

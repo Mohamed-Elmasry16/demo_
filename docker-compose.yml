@@ -1,0 +1,43 @@
+services:
+
+  # ── FastAPI Churn Prediction API ──────────────────────────
+  churn-api:
+    build: .
+    container_name: churn-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HF_HOME=/model-cache
+      - TRANSFORMERS_CACHE=/model-cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s   # الـ LLM بياخد وقت في الـ startup
+
+  # ── n8n Workflow Automation ───────────────────────────────
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=changeme123      # ← غيّر الباسورد
+      - WEBHOOK_URL=http://localhost:5678
+      - GENERIC_TIMEZONE=Africa/Cairo
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # لو عايز تستورد الـ workflow تلقائياً uncommit السطر دا:
+      # - ./churn_n8n_workflow.json:/home/node/.n8n/workflows/churn.json
+    depends_on:
+      churn-api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
